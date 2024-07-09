@@ -1,0 +1,36 @@
+{% extends 'Navbar/Projectnavbar.html' %}
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Printing</title>
+</head>
+<body>
+
+{% block body %}
+<div class="container">
+  <div class="row">
+    <div class="col">
+
+        <div>
+    <br>
+  <form method="post" action="{% url 'qrlogic' %}">
+        {% csrf_token %}
+        <label>Enter Text:</label>
+        <input type="text" name="user_input" required>
+        <button type="submit">Submit</button>
+    </form>
+</div>
+    </div>
+    <div class="col">
+
+        <img src="{% static img_path %}" alt="QR Code">
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+</body>
+</html>

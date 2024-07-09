@@ -1,0 +1,155 @@
+{% extends 'Navbar/employernavbar.html' %}
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Applications</title>
+    <style>
+        table, th, td {
+            border: 4px solid black;
+            border-collapse: collapse;
+            padding: 8px;
+        }
+        th {
+            background-color: #ca2525;
+        }
+        .btn {
+            display: inline-block;
+            margin-right: 5px;
+            padding: 8px 12px;
+            text-decoration: none;
+            color: #fff;
+            background-color: #007bff;
+            border: 1px solid #007bff;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        #schedule-interview-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+{% block body %}
+    <h1>Job Applications</h1>
+
+    <table border="3">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Job Details</th>
+                <th>Resume</th>
+                <th>Cover Letter</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for job_application in job_applications %}
+                <tr border="2">
+                    <td>{{ job_application.name }}</td>
+                    <td class="email">{{ job_application.email }}</td>
+                    <td>{{ job_application.job_details }}</td>
+                    <td>
+                        {% if job_application.resume %}
+                            <a href="{{ job_application.resume.url }}" target="_blank">Download Resume</a>
+                        {% else %}
+                            No resume uploaded
+                        {% endif %}
+                    </td>
+                    <td>{{ job_application.cover_letter }}</td>
+                    <td>
+                        <button type="button" class="btn btn-success schedule-interview" data-email="{{ job_application.email }}">Schedule Interview</button>
+                        <a href="#" class="btn btn-danger">Application Rejected</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="schedule-interview-modal">
+        <h2>Schedule Interview</h2>
+        <form id="interview-form">
+            <input type="hidden" id="applicant-email" name="applicant-email">
+            <label for="interview-date">Select Interview Date:</label>
+            <input type="date" id="interview-date" name="interview-date">
+            <br><br>
+            <button type="button" class="btn btn-primary" id="send-mail-btn">Send Mail</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let scheduleButtons = document.querySelectorAll('.schedule-interview');
+            let modal = document.getElementById('schedule-interview-modal');
+            let emailInput = document.getElementById('applicant-email');
+            let sendMailButton = document.getElementById('send-mail-btn');
+
+            scheduleButtons.forEach(function(button) {
+                button.addEventListener('click', function() {
+                    let email = button.getAttribute('data-email');
+                    emailInput.value = email;
+                    modal.style.display = 'block';
+                });
+            });
+
+            sendMailButton.addEventListener('click', function() {
+                let selectedDate = document.getElementById('interview-date').value;
+                let applicantEmail = emailInput.value;
+
+                if (!selectedDate) {
+                    alert('Please select a date.');
+                    return;
+                }
+
+                fetch("{% url 'schedule_interview' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: JSON.stringify({
+                        email: applicantEmail,
+                        date: selectedDate
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Email sent successfully.');
+                        modal.style.display = 'none';
+                    } else {
+                        alert('Failed to send email.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                });
+            });
+        });
+    </script>
+
+{% endblock %}
+</body>
+</html>

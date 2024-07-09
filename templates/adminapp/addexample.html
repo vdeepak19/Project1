@@ -1,0 +1,43 @@
+{% extends 'Navbar/Projectnavbar.html' %}
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Printing</title>
+</head>
+<body>
+
+{% block body %}
+<div class="container">
+  <div class="row">
+    <div class="col">
+      First in DOM, ordered last
+        <div>
+    <br>
+  <form method="post" action="{% url 'addlogic' %}">
+        {% csrf_token %}
+        <label>Enter Number 1:</label>
+        <input type="text" name="number1" required>
+        <br><br>
+      <label>Enter Number 2:</label>
+        <input type="text" name="number2" required>
+      <br><br>
+      <div class="d-grid gap-2 col-6 mx-auto">
+  <button class="btn btn-primary" type="submit">Add</button>
+</div>
+    </form>
+
+</div>
+    </div>
+    <div class="col">
+      Second in DOM, unordered
+        <h1>{{ number3 }}</h1>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+</body>
+</html>
